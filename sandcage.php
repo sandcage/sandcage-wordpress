@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SandCage
  * Plugin URI: http://wordpress.org/plugins/sandcage/
- * Description: SandCage Plugin to integrate with your SandCage account. Manage your Files and Speed up your Website. Process, Store and Delivery.
+ * Description: SandCage Plugin to integrate with your SandCage account. Manage your Files and Speed up your Website. Process, Store and Deliver.
  * Version: 0.1.0.0
  * Author: SandCage
  * Author URI: https://www.sandcage.com/
@@ -137,11 +137,13 @@ class wpSandCage{
 		add_submenu_page( $my_assets_item, __( 'SandCage Media Library', 'sandcage-wp' ), __( 'Media Library', 'sandcage-wp' ), 'publish_pages', $my_assets_item );
 		add_submenu_page( $my_assets_item, __( 'SandCage Settings', 'sandcage-wp' ), __( 'Settings', 'sandcage-wp' ), 'manage_options', 'SandCage', array( $this, 'options' ));
 		wp_enqueue_style( 'sandcage-wp', plugin_dir_url( __FILE__ ) . 'css/styles.css', array(), $this->_sc_wp_version );
+    wp_enqueue_script( 'sandcage-js', plugins_url( '/js/sandcage.js?v=' . $this->_sc_wp_version . '&t=media_lib', __FILE__ ) );
 	}
 
 	/**
 	 * Print and handle the SandCage options
 	 *
+	 * @uses wp_enqueue_script()
 	 * @uses _show_help()
 	 * @uses update_option()
 	 * @uses settings_fields()
@@ -149,6 +151,7 @@ class wpSandCage{
 	 * @uses admin_url()
 	 */
 	public function options() {
+	  wp_enqueue_script( 'jquery' );
 		$success = $error = false;
 		if ( isset( $_POST['sc_hidden'] ) && ( $_POST['sc_hidden'] == '1' ) ) {
 			if ( isset( $_POST[$this->_optionsName . '_api_key'] ) && !empty( $_POST[$this->_optionsName . '_api_key'] ) ) {
@@ -173,10 +176,18 @@ class wpSandCage{
 		?>
 		<script type="text/javascript">
 		jQuery(function($){
-			$('#wp_sandcage span.help').off('click');
-			$('#wp_sandcage span.help').on('click', function(){
-				$(this).next().toggle();
-			});
+			try {
+				$('#wp_sandcage span.help').off('click');
+				$('#wp_sandcage span.help').on('click', function(){
+					$(this).next().toggle();
+				});
+			}
+			catch(e) {
+				$('#wp_sandcage span.help').unbind('click');
+				$('#wp_sandcage span.help').bind('click', function(){
+					$(this).next().toggle();
+				});
+			}
 		});
 		</script>
 		<div class="wrap">
@@ -408,6 +419,7 @@ class wpSandCage{
 	        $result = array(
 	        	'status'=>'success', 
 	        	'attachment_id'=>$this->wp_insert_sandcage_attachment( $asset_info, $wp_post_id, $wp_attachment_id, null, $sandcage_file_token, $sandcage_request_id ),
+	        	'post_id'=>$wp_post_id,
 	        	'thumb_dimensions'=>$this->get_image_sizes()
 	        	);
 	      }
@@ -513,14 +525,11 @@ class wpSandCage{
 	 * 
 	 * @param  string $table_column Name of the custom column.
 	 * @param  int $wp_attachment_id Attachment ID.
-	 * @uses   wp_enqueue_script()
 	 * @uses   plugins_url()
 	 * @uses   wp_get_attachment_metadata()
 	 * @uses   wp_nonce_url()
 	 */
   public function media_lib_upload_column_value( $table_column, $wp_attachment_id ) {
-	  wp_enqueue_script( 'jquery' );
-    wp_enqueue_script( 'sandcage-js', plugins_url( '/js/sandcage.js?v=' . $this->_sc_wp_version . '&t=media_lib', __FILE__ ) );
     if ( $table_column == 'media_url' ) {
       $attachment_metadata = wp_get_attachment_metadata( $wp_attachment_id );
       if ( is_array( $attachment_metadata ) && $attachment_metadata["from_sandcage"] ) {
@@ -562,7 +571,7 @@ class wpSandCage{
     wp_enqueue_script( 'sandcage-js', plugins_url( '/js/sandcage.js?v=' . $this->_sc_wp_version, __FILE__ ) );
     $admin_ajax_url = wp_nonce_url( admin_url( 'admin-ajax.php' ), 'add_media_from_sandcage', '_wpnonce_sandcage' );
 
-    echo '<a href="javascript:void(0);" class="button insert-media add_media add_media_from_sandcage" ' .
+    echo '<a href="javascript:void(0);" class="button add_media_from_sandcage" id="add_media_from_sandcage" ' .
 	    'title="' . __( 'Add Media from SandCage', 'sandcage-wp' ) . '">' .
 		    '<img src="' . plugins_url( 'images/logo60x40.png', __FILE__ ) . '"> ' . __( 'Add Media', 'sandcage-wp' ) .
 	    '</a>' .
@@ -910,7 +919,6 @@ class wpSandCage{
 	 */
   public function media_lib_admin_notices() {
     global $post_type, $pagenow;
-    $notice_dismiss = '<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>';
     if ( $post_type == 'attachment' && $pagenow == 'upload.php' && isset( $_REQUEST['sc_msg'] ) && !empty( $_REQUEST['sc_msg'] ) ) {
       echo '<div class="';
       if ( !isset( $_REQUEST['sc_error'] ) || ( $_REQUEST['sc_error'] == 0 ) ) {
@@ -918,10 +926,10 @@ class wpSandCage{
       } else {
       	echo 'error';
       }
-      echo ' notice is-dismissible"><p>' . $_REQUEST['sc_msg'] . '</p>' . $notice_dismiss . '</div>';
+      echo ' notice is-dismissible"><p>' . $_REQUEST['sc_msg'] . '</p></div>';
     }
     if ( $pagenow == 'upload.php' && isset( $_REQUEST['upload_to_sandcage'] ) && !empty( $_REQUEST['upload_to_sandcage'] ) ) {
-      echo '<div class="error notice is-dismissible"><p>Sorry, this file format is not supported.</p>' . $notice_dismiss . '</div>';
+      echo '<div class="error notice is-dismissible"><p>Sorry, this file format is not supported.</p></div>';
     }
   }
 
@@ -950,7 +958,8 @@ class wpSandCage{
 		  wp_enqueue_script( 'jquery' );
 	    wp_enqueue_script( 'sandcage-js', plugins_url( '/js/sandcage.js?v=' . $this->_sc_wp_version, __FILE__ ) );
     }
-    return '<iframe name="sandcage-asset-frame" id="sandcage-asset-frame" src="' . $this->_sc_base . 'embedded_panel/my_assets_embedded_wp?' . $query . '" style="width:100%"></iframe>';
+    return '<span id="sandcage-conf"></span>' .
+    	'<iframe name="sandcage-asset-frame" id="sandcage-asset-frame" src="' . $this->_sc_base . 'embedded_panel/my_assets_embedded_wp?' . $query . '" style="width:100%"></iframe>';
   }
 
 	/**
@@ -966,10 +975,10 @@ class wpSandCage{
 		?>
 		<ol class="hide-if-js">
 			<li>
-				<?php echo sprintf( __( 'You must have a SandCage account. If you do not have one, <a href="%s" target="_blank">sign up for a free account</a>.', 'sandcage-wp' ), $this->_sc_base . 'register?ref=' . urlencode( get_home_url() ) . '&ref_type=wp&ref_type_version=' . $wp_version ); ?>
+				<?php echo sprintf( __( 'To get your SandCage API Key, <a href="%s" target="_blank">sign up for a free account</a>.', 'sandcage-wp' ), $this->_sc_base . 'register?ref=' . urlencode( get_home_url() ) . '&ref_type=wp&ref_type_version=' . $wp_version ); ?>
 			</li>
 			<li>
-				<?php echo sprintf( __( 'In your SandCage account go to "Account" -> "API Key". If you are already logged in click <a href="%s" target="_blank">sign up for a free account</a>.', 'sandcage-wp' ), $this->_sc_base . 'panel/api_key?ref=' . urlencode( get_home_url() ) . '&ref_type=wp&ref_type_version=' . $wp_version ); ?>
+				<?php echo sprintf( __( 'In your SandCage account go to "Account" -> "API Key". If you are already logged in click <a href="%s" target="_blank">here</a>.', 'sandcage-wp' ), $this->_sc_base . 'panel/api_key?ref=' . urlencode( get_home_url() ) . '&ref_type=wp&ref_type_version=' . $wp_version ); ?>
 			</li>
 		</ol>
 		<?php

@@ -9,25 +9,23 @@ jQuery(document).ready(function($) {
 
 	if ( typeof $('#sandcage-conf').html() !== "undefined" ) {
 		window.sandcage_conf = $('#sandcage-conf');
-		if (window.sandcage_conf.length != 0) {
-			$('.add_media_from_sandcage').off('click');
-			$('.add_media_from_sandcage').on('click', function(){
-				if ($('#sandcage-asset-frame').length == 0) {
-					var p = '<div id="sandcage-asset-frame-wrapper">' + 
-						'<iframe name="sandcage-asset-frame" id="sandcage-asset-frame" src="' +
-							window.sandcage_conf.data("src") +
-							'" style="width:100%"></iframe>' +
-						'</div>';
-					$(p).appendTo($('#wpbody-content'));
-				}else{
-					adminStyling();
-				}
-				$('.sandcage_message').html('');
-				resizeIFrame();
-				$('#sandcage-asset-frame-wrapper').show();
-				return false;
-			});
-		}else{
+		if ( typeof window.sandcage_conf.attr('data-src') !== "undefined" ) {
+
+			try {
+				$('#add_media_from_sandcage').off('click');
+				$('#add_media_from_sandcage').on('click', function(){
+					addMediaFromSandCage()
+				});
+			}
+			catch(e) {
+				$('#add_media_from_sandcage').unbind('click');
+				$('#add_media_from_sandcage').bind('click', function(){
+					addMediaFromSandCage()
+				});
+			}
+
+		} else {
+			window.log('on the media page');
 			setTimeout(function(){
 				adminStyling();
 				resizeIFrame();
@@ -38,6 +36,23 @@ jQuery(document).ready(function($) {
 		setTimeout(function(){
 			checkForPendingFiles();
 		}, 1000);
+	}
+
+	function addMediaFromSandCage() {
+		if ($('#sandcage-asset-frame').length == 0) {
+			var p = '<div id="sandcage-asset-frame-wrapper">' + 
+				'<iframe name="sandcage-asset-frame" id="sandcage-asset-frame" src="' +
+					window.sandcage_conf.data("src") +
+					'" style="width:100%"></iframe>' +
+				'</div>';
+			$(p).appendTo($('#wpbody-content'));
+		}else{
+			adminStyling();
+		}
+		$('.sandcage_message').html('');
+		resizeIFrame();
+		$('#sandcage-asset-frame-wrapper').show();
+		return false;
 	}
 
 	function checkForPendingFiles() {
@@ -169,14 +184,14 @@ jQuery(document).ready(function($) {
 			success:function(h){
 				window.log(h);
 				if ((typeof h.status !== "undefined") && (h.status == 'success')) {
-					image.addClass('wp-image-' + h.attachment_id);
+					image.addClass('wp-image-' + h.attachment_id).addClass('alignnone').addClass('size-full').attr('alt', data.name).attr('data-mce-src', data.src);
 				} else {
 					alert(h.message);
 					if (data.attachment_id) {
 						image.addClass('wp-image-' + data.attachment_id);
 					}
 				}
-				image = $('<a/>').attr('href', h.src).append(image);
+				image = $('<a/>').attr('href', data.src).attr('title', data.name).attr('data-mce-href', data.src).append(image);
 				if (foundTinyMCEActiveEditorSelection()) {
 					tinyMCE.activeEditor.selection.setContent($('<div/>').append(image).html()); 
 				} else {
