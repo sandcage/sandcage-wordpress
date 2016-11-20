@@ -11,14 +11,14 @@ Manage your Files and Speed up your Website. Process, Store in the cloud and Del
 
 == Description ==
 
-With this plugin you can integrate with the SandCage API and use it to store your files in the cloud, compress and process your images more efficiently than ever before and deliver your files from a blazing fast CDN. Works for new and existing Wordpress files. Supported image file types for processing are JPEG, PNG, GIF (including animated GIF) and BMP. Compress your images in either lossless and lossy optimization modes and speed up your load time even further.
+With this plugin you can integrate with the SandCage API and use it to store your files in the cloud, compress and process your images more efficiently than ever before and deliver your files from a blazing fast CDN. Works for new and existing WordPress files. Supported image file types for processing are JPEG, PNG, GIF (including animated GIF) and BMP. Compress your images in either lossless and lossy optimization modes and speed up your load time even further.
 For further information, please visit [SandCage](https://www.sandcage.com "SandCage").
 
 == Installation ==
 
 ### Manual installation ###
 
-1. Download the latest release. The zip file contains the Wordpress plugin code and the most recent SandCage PHP library
+1. Download the latest release. The zip file contains the WordPress plugin code and the most recent SandCage PHP library
 2. Unzip the file to your "wp-content/plugins" directory
 3. Go to the "Plugins" page and activate the SandCage plugin once the plugin code has been uploaded
 4. Go to the "SandCage" menu option in the admin panel and enter your SandCage API Key.

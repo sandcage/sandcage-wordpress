@@ -37,6 +37,8 @@ All rights reserved.
 
 include(dirname(__FILE__) . '/sandcage-api-php/SandCage.php');
 
+use SandCage\SandCage;
+
 /**
  * wpSandCage is the class that handles ALL of the plugin functionality,
  * and helps us avoid name collisions
@@ -763,9 +765,9 @@ class wpSandCage{
 	      	array_push( $payload['jobs'][0]['tasks'], $this_task );
 				}
 	  	}
-			$sandcage->scheduleFiles( $payload, add_query_arg( array( 'action'=>'sandcage_callback_listener' ), admin_url( 'admin-ajax.php' ) ) );
-			$get_info_status = $sandcage->getHttpStatus();
-			$get_info_response = $sandcage->getResponse();
+			$sandcage->call( 'schedule-tasks', $payload, add_query_arg( array( 'action'=>'sandcage_callback_listener' ), admin_url( 'admin-ajax.php' ) ) );
+			$get_info_status = $sandcage->status;
+			$get_info_response = $sandcage->response;
 
 			if ( $get_info_status['http_code'] == 200 ) {
 				$response = json_decode( $get_info_response, true );
