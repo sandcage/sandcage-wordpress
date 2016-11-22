@@ -156,13 +156,17 @@ class wpSandCage{
 		wp_enqueue_script( 'jquery' );
 		$success = $error = false;
 		if ( isset( $_POST['sc_hidden'] ) && ( intval( $_POST['sc_hidden'] ) == 1 ) ) {
-			if ( isset( $_POST[$this->_optionsName . '_api_key'] ) && !empty( $_POST[$this->_optionsName . '_api_key'] ) ) {
-				$this->_settings['api_key'] = sanitize_text_field( $_POST[$this->_optionsName . '_api_key'] );
-				update_option( $this->_optionsName, $this->_settings );
-				$success = true;
+			if ( check_admin_referer( 'sc_options', '_sc_wpnonce' ) ) {
+				if ( isset( $_POST[$this->_optionsName . '_api_key'] ) && !empty( $_POST[$this->_optionsName . '_api_key'] ) ) {
+					$this->_settings['api_key'] = sanitize_text_field( $_POST[$this->_optionsName . '_api_key'] );
+					update_option( $this->_optionsName, $this->_settings );
+					$success = true;
+				} else {
+					$error = true;
+				}
 			} else {
-				$error = true;
-			}
+					$error = true;
+				}
 		}
 
 		if ( $success ) {
@@ -220,6 +224,7 @@ class wpSandCage{
 				</table>
 				<p class="submit">
 					<input type="hidden" name="sc_hidden" value="1">
+					<?php wp_nonce_field( 'sc_options', '_sc_wpnonce' ); ?>
 					<input type="submit" name="Submit" value="<?php _e( 'Update Options &raquo;', 'sandcage-wp' ); ?>" />
 				</p>
 			</form>
