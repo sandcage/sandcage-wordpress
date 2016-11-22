@@ -422,9 +422,9 @@ class wpSandCage{
 					$height = intval( $_POST['h'] );
 					$asset_info = array(
 						'src_url'=>$sandcage_source_url, 
-						'width'=>$_POST['w'], 
-						'height'=>$_POST['h'], 
-						'mime'=>$_POST['mime'], 
+						'width'=>$width, 
+						'height'=>$height, 
+						'mime'=>sanitize_text_field( $_POST['mime'] ), 
 						'name'=>$name
 						);
 					$result = array(
