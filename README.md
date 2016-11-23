@@ -2,6 +2,7 @@
 
 The official v0.1.0.0 WordPress plugin for [SandCage](https://www.sandcage.com/).
 This plugin makes use of the [SandCage PHP library](https://github.com/sandcage/sandcage-api-php).
+
 Note that this plugin will be maintained on [WordPress](https://wordpress.org/plugins/sandcage/) where future versions will be released.
 
 
